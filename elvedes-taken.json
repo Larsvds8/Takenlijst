@@ -2,16 +2,6 @@
   "version": 1,
   "tasks": [
     {
-      "id": "ELV-CZ61O-3MQ",
-      "createdAt": 1782987927900,
-      "updatedAt": 1782988312037,
-      "title": "takenlijst maken",
-      "cat": "PIM",
-      "prio": "Hoog",
-      "deadline": "",
-      "status": "Klaar"
-    },
-    {
       "id": "ELV-D6KZT-WV1",
       "createdAt": 1782988273865,
       "updatedAt": 1782988273865,
@@ -22,5 +12,7 @@
       "status": "Nog niet gestart"
     }
   ],
-  "tombstones": {}
+  "tombstones": {
+    "ELV-CZ61O-3MQ": 1782988315073
+  }
 }
