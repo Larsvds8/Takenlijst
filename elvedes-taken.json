@@ -70,6 +70,16 @@
       "prio": "Gemiddeld",
       "deadline": "",
       "status": "Bezig"
+    },
+    {
+      "id": "ELV-KLCD1-AR5",
+      "createdAt": 1783000719829,
+      "updatedAt": 1783000719829,
+      "title": "E-scooters compatibiliteit",
+      "cat": "Overig",
+      "prio": "Gemiddeld",
+      "deadline": "",
+      "status": "Nog niet gestart"
     }
   ],
   "tombstones": {
