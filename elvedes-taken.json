@@ -40,6 +40,16 @@
       "prio": "Gemiddeld",
       "deadline": "",
       "status": "Nog niet gestart"
+    },
+    {
+      "id": "ELV-EFI98-4UW",
+      "createdAt": 1782990369836,
+      "updatedAt": 1782990369836,
+      "title": "Pins en clips in beschrijving toevoegen",
+      "cat": "PIM",
+      "prio": "Gemiddeld",
+      "deadline": "",
+      "status": "Nog niet gestart"
     }
   ],
   "tombstones": {
