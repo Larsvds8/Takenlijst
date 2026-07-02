@@ -1,18 +1,8 @@
 {
   "version": 1,
-  "tasks": [
-    {
-      "id": "ELV-D6KZT-WV1",
-      "createdAt": 1782988273865,
-      "updatedAt": 1782988316273,
-      "title": "takenlijst checken",
-      "cat": "PIM",
-      "prio": "Gemiddeld",
-      "deadline": "",
-      "status": "Klaar"
-    }
-  ],
+  "tasks": [],
   "tombstones": {
-    "ELV-CZ61O-3MQ": 1782988315073
+    "ELV-CZ61O-3MQ": 1782988315073,
+    "ELV-D6KZT-WV1": 1782988317449
   }
 }
