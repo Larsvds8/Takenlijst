@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elvedes — Werkplaatslijst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E30613;
+  --red-dark:#C10511;
+  --logo-red:#DF271C;
+  --ink:#161616;
+  --steel:#6B6F76;
+  --paper:#F6F5F2;
+  --line:#DFDDD7;
+  --fill:#EFEDE8;          /* zachte veldvulling */
+  --fill-deep:#E9E7E1;
+  --card:#FFFFFF;
+  --amber:#B96A1B;         /* koper — bezig / gemiddeld */
+  --green:#3E7A50;         /* geolied groen — klaar */
+  --head:'Barlow Condensed',sans-serif;
+  --body:'Inter',-apple-system,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r-lg:20px; --r-md:16px; --r-sm:12px;
+  --shadow-sm:0 1px 2px rgba(22,22,22,.04),0 6px 20px rgba(22,22,22,.05);
+  --shadow-md:0 2px 4px rgba(22,22,22,.05),0 14px 34px rgba(22,22,22,.10);
+  --spring:cubic-bezier(.2,.9,.3,1.1);
+  --ease:cubic-bezier(.25,.8,.25,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer;background:none;border:none;color:inherit}
+input,select{font:inherit;color:var(--ink)}
+::selection{background:rgba(227,6,19,.15)}
+
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.35}}
+
+/* ── navigatiebalk ─────────────────────────────────── */
+.bar{position:sticky;top:0;z-index:40;background:rgba(246,245,242,.78);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(22,22,22,.06)}
+.bar-inner{max-width:880px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;color:var(--logo-red)}
+.logo svg{height:32px;width:auto;display:block}
+.bar .spacer{flex:1}
+.sync{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.05em;padding:6px 12px;border-radius:999px;background:var(--fill);color:var(--steel);transition:.25s var(--ease);max-width:300px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--steel);flex:none}
+.sync.ok{background:rgba(62,122,80,.10);color:var(--green)}
+.sync.ok i{background:var(--green)}
+.sync.busy{background:rgba(185,106,27,.10);color:var(--amber)}
+.sync.busy i{background:var(--amber);animation:pulse 1s ease infinite}
+.sync.err{background:rgba(227,6,19,.08);color:var(--red)}
+.sync.err i{background:var(--red)}
+.iconbtn{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--steel);transition:.2s var(--ease);flex:none}
+.iconbtn:hover{background:var(--fill);color:var(--ink)}
+.iconbtn:active{transform:scale(.92)}
+.iconbtn svg{width:18px;height:18px}
+body[data-sync="busy"] #btnRefresh svg{animation:spin 1s linear infinite}
+
+.sheet{max-width:880px;margin:0 auto;padding:36px 24px 80px}
+
+/* ── hero ──────────────────────────────────────────── */
+.hero{animation:rise .5s var(--ease) both}
+.hero .date{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--steel);text-transform:uppercase}
+.hero h1{font-family:var(--head);font-weight:700;font-size:clamp(38px,6vw,52px);line-height:1.05;letter-spacing:.01em;margin-top:6px}
+.hero h1 em{font-style:normal;color:var(--red)}
+.hero .sub{margin-top:6px;color:var(--steel);font-size:14px}
+.progress{margin-top:20px;display:flex;align-items:center;gap:14px}
+.progress .track{flex:1;height:5px;border-radius:999px;background:var(--fill-deep);overflow:hidden}
+.progress .fillbar{height:100%;border-radius:999px;background:var(--red);transition:width .6s var(--ease)}
+.progress .pct{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--steel);white-space:nowrap}
+
+/* ── verbindingsbanner ─────────────────────────────── */
+.banner{display:flex;align-items:center;gap:14px;margin-top:24px;padding:14px 18px;background:var(--card);border:1px solid rgba(22,22,22,.05);border-radius:var(--r-md);box-shadow:var(--shadow-sm);animation:rise .5s var(--ease) .05s both}
+.banner .dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex:none}
+.banner p{flex:1;font-size:13px;color:var(--steel)}
+.banner p strong{color:var(--ink)}
+.banner button{font-weight:600;font-size:13px;color:var(--red);padding:7px 16px;border-radius:999px;background:rgba(227,6,19,.07);transition:.2s var(--ease);white-space:nowrap}
+.banner button:hover{background:rgba(227,6,19,.13)}
+
+/* ── stats ─────────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px;animation:rise .5s var(--ease) .08s both}
+.stat{background:var(--card);border:1px solid rgba(22,22,22,.05);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.stat .n{font-family:var(--mono);font-size:24px;font-weight:700;line-height:1.1}
+.stat .l{font-size:10.5px;font-weight:600;letter-spacing:.1em;color:var(--steel);text-transform:uppercase;margin-top:2px}
+.stat.s-bezig .n{color:var(--amber)}
+.stat.s-klaar .n{color:var(--green)}
+.stat.s-laat .n{color:var(--red)}
+
+/* ── invoer ────────────────────────────────────────── */
+.form-card{margin-top:24px;background:var(--card);border:1px solid rgba(22,22,22,.05);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);animation:rise .5s var(--ease) .12s both;transition:box-shadow .3s var(--ease)}
+.form-card:focus-within{box-shadow:var(--shadow-md)}
+.form-edit{display:flex;align-items:center;gap:10px;padding:12px 20px 0;font-size:12px;color:var(--steel)}
+.form-edit .fid{font-family:var(--mono);font-size:11px;color:var(--red);font-weight:500}
+.form-edit .cancel{margin-left:auto;font-weight:600;font-size:12.5px;color:var(--steel);padding:4px 10px;border-radius:999px;transition:.2s}
+.form-edit .cancel:hover{background:var(--fill);color:var(--ink)}
+.form-top{display:flex;align-items:center;gap:14px;padding:8px 10px 8px 22px}
+.title-input{flex:1;border:none;background:none;font-size:17px;font-weight:500;padding:14px 0;min-width:0}
+.title-input:focus{outline:none}
+.title-input::placeholder{color:#ADB0B4;font-weight:400}
+.btn-add{background:var(--red);color:#fff;font-family:var(--head);font-weight:600;font-size:16px;letter-spacing:.1em;padding:11px 24px;border-radius:999px;box-shadow:0 6px 18px rgba(227,6,19,.28);transition:.2s var(--spring);white-space:nowrap}
+.btn-add:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 9px 24px rgba(227,6,19,.34)}
+.btn-add:active{transform:scale(.96)}
+.form-controls{display:flex;flex-wrap:wrap;gap:10px;padding:2px 20px 18px;border-top:1px solid rgba(22,22,22,.05);padding-top:14px;margin:0 2px}
+.ctl{display:flex;flex-direction:column;gap:5px}
+.ctl>span{font-size:10px;font-weight:600;letter-spacing:.12em;color:var(--steel);text-transform:uppercase;padding-left:6px}
+.pillfield{appearance:none;-webkit-appearance:none;border:none;background:var(--fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236B6F76' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 13px center;border-radius:999px;height:38px;padding:0 32px 0 15px;font-size:13px;font-weight:500;transition:.2s;cursor:pointer}
+.pillfield:hover{background-color:var(--fill-deep)}
+.pillfield:focus{outline:none;box-shadow:0 0 0 3px rgba(227,6,19,.18)}
+input.pillfield{background-image:none;padding:0 15px;font-family:var(--mono);font-size:12.5px;cursor:text}
+/* segmented control */
+.seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:var(--fill);border-radius:999px;padding:3px;height:38px;min-width:246px}
+.seg .thumb{position:absolute;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/3);background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(22,22,22,.16);transition:transform .28s var(--spring)}
+.seg:has(input[value="Gemiddeld"]:checked) .thumb{transform:translateX(100%)}
+.seg:has(input[value="Hoog"]:checked) .thumb{transform:translateX(200%)}
+.seg label{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:500;color:var(--steel);cursor:pointer;user-select:none;border-radius:999px;transition:color .2s}
+.seg label i{width:7px;height:7px;border-radius:50%;flex:none;opacity:.55;transition:.2s}
+.seg label.p-laag i{background:var(--steel)}
+.seg label.p-mid i{background:var(--amber)}
+.seg label.p-hoog i{background:var(--red)}
+.seg label:has(input:checked){color:var(--ink);font-weight:600}
+.seg label:has(input:checked) i{opacity:1}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+
+/* ── werkbalk / filters ────────────────────────────── */
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:28px 0 14px;animation:rise .5s var(--ease) .16s both}
+.chip{font-size:12.5px;font-weight:500;color:var(--steel);padding:7px 15px;border-radius:999px;background:transparent;transition:.2s var(--ease)}
+.chip:hover{background:var(--fill)}
+.chip.on{background:var(--ink);color:#fff;font-weight:600}
+.toolbar .spacer{flex:1}
+.toolbar .pillfield{height:34px;font-size:12px;background-color:transparent;border:1px solid rgba(22,22,22,.10)}
+.toolbar .pillfield:hover{background-color:var(--fill)}
+
+/* ── takenlijst ────────────────────────────────────── */
+.list{display:flex;flex-direction:column;gap:10px}
+.task{display:flex;align-items:center;gap:15px;background:var(--card);border:1px solid rgba(22,22,22,.05);border-radius:var(--r-md);padding:14px 16px;box-shadow:var(--shadow-sm);transition:box-shadow .25s var(--ease),transform .25s var(--ease);animation:rise .35s var(--ease) both;animation-delay:calc(var(--i,0)*20ms)}
+.task:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.task.editing{box-shadow:0 0 0 2px var(--red),var(--shadow-md)}
+.check{width:24px;height:24px;border-radius:50%;border:1.6px solid #C6C4BE;background:transparent;flex:none;display:grid;place-items:center;transition:.25s var(--spring)}
+.task.p-Hoog .check{border-color:rgba(227,6,19,.55)}
+.task.p-Gemiddeld .check{border-color:rgba(185,106,27,.55)}
+.check:hover{border-color:var(--red);transform:scale(1.08)}
+.check .tick{width:11px;height:9px;transform:scale(0);transition:transform .3s var(--spring)}
+.task.done .check{background:var(--red);border-color:var(--red)}
+.task.done .check .tick{transform:scale(1)}
+.task-main{flex:1;min-width:0}
+.task-title{font-weight:500;font-size:15px;overflow-wrap:anywhere;transition:color .2s}
+.task.done .task-title{text-decoration:line-through;text-decoration-color:rgba(107,111,118,.55);color:var(--steel)}
+.task-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;margin-top:4px}
+.tid{font-family:var(--mono);font-size:10px;color:#A5A8AC;letter-spacing:.03em}
+.cat-tag{font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--steel);background:var(--fill);padding:2.5px 9px;border-radius:999px}
+.prio{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;color:var(--steel)}
+.prio i{width:6px;height:6px;border-radius:50%}
+.prio.p-Hoog{color:var(--red)}.prio.p-Hoog i{background:var(--red)}
+.prio.p-Gemiddeld{color:var(--amber)}.prio.p-Gemiddeld i{background:var(--amber)}
+.prio.p-Laag i{background:var(--steel)}
+.due{font-family:var(--mono);font-size:10.5px;color:var(--steel)}
+.due .rel{font-weight:700}
+.due.overdue{color:var(--red)}
+.due.today .rel{color:var(--amber)}
+.status-sel{appearance:none;-webkit-appearance:none;border:none;flex:none;font-size:12px;font-weight:600;border-radius:999px;padding:7px 26px 7px 13px;cursor:pointer;transition:.2s;background:var(--fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236B6F76' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 11px center;color:var(--steel)}
+.status-sel.st-Bezig{background-color:rgba(185,106,27,.11);color:var(--amber)}
+.status-sel.st-Klaar{background-color:rgba(62,122,80,.11);color:var(--green)}
+.status-sel:focus{outline:none;box-shadow:0 0 0 3px rgba(227,6,19,.15)}
+.task-actions{display:flex;gap:2px;flex:none}
+.task-actions button{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;color:#A5A8AC;transition:.2s var(--ease)}
+.task-actions button svg{width:15px;height:15px}
+.task-actions button:hover{background:var(--fill);color:var(--ink)}
+.task-actions .del:hover{background:rgba(227,6,19,.08);color:var(--red)}
+.task-actions .del.armed{width:auto;padding:0 13px;background:var(--red);color:#fff;font-size:12px;font-weight:600}
+@media (hover:hover){
+  .task-actions{opacity:0;transition:opacity .2s}
+  .task:hover .task-actions,.task:focus-within .task-actions{opacity:1}
+}
+
+.empty{padding:64px 20px;text-align:center;animation:rise .4s var(--ease) both}
+.empty svg{width:44px;height:44px;color:#C9C7C1;margin-bottom:14px}
+.empty .big{font-size:15px;font-weight:600;color:var(--ink)}
+.empty .subtext{font-size:13px;color:var(--steel);margin-top:4px}
+
+footer{margin-top:56px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:#ABAEA9;text-transform:uppercase;display:flex;flex-direction:column;gap:5px}
+
+/* ── instellingen ──────────────────────────────────── */
+dialog{border:none;background:var(--card);border-radius:var(--r-lg);padding:0;width:min(480px,calc(100vw - 32px));color:var(--ink);box-shadow:0 24px 80px rgba(22,22,22,.28)}
+dialog[open]{animation:pop .3s var(--spring)}
+dialog::backdrop{background:rgba(22,22,22,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.dlg-head{display:flex;align-items:center;gap:12px;padding:20px 24px 0}
+.dlg-head h2{font-family:var(--head);font-weight:700;font-size:24px;letter-spacing:.02em;flex:1}
+.dlg-head button{width:30px;height:30px;border-radius:50%;background:var(--fill);color:var(--steel);display:grid;place-items:center;font-size:13px;transition:.2s}
+.dlg-head button:hover{background:var(--fill-deep);color:var(--ink)}
+.dlg-body{padding:18px 24px 24px;display:flex;flex-direction:column;gap:15px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--steel);text-transform:uppercase;padding-left:2px}
+.field input{border:1.5px solid transparent;background:var(--fill);border-radius:var(--r-sm);padding:11px 14px;font-family:var(--mono);font-size:13px;transition:.2s}
+.field input:focus{outline:none;background:#fff;border-color:var(--red);box-shadow:0 0 0 3px rgba(227,6,19,.13)}
+.tok-row{display:flex;gap:8px}
+.tok-row input{flex:1}
+.tok-row button{border-radius:var(--r-sm);background:var(--fill);padding:0 14px;font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--steel);transition:.2s}
+.tok-row button:hover{background:var(--fill-deep);color:var(--ink)}
+.hint{background:var(--paper);border-radius:var(--r-sm);padding:12px 15px;font-size:12px;color:var(--steel);line-height:1.55}
+.hint b{color:var(--ink)}
+.dlg-status{font-family:var(--mono);font-size:11px;min-height:16px;color:var(--steel)}
+.dlg-status.ok{color:var(--green)}
+.dlg-status.err{color:var(--red)}
+.dlg-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn-primary{background:var(--red);color:#fff;font-weight:600;font-size:14px;padding:11px 22px;border-radius:999px;box-shadow:0 6px 18px rgba(227,6,19,.25);transition:.2s var(--spring)}
+.btn-primary:hover{background:var(--red-dark);transform:translateY(-1px)}
+.btn-primary:active{transform:scale(.96)}
+.btn-ghost{font-weight:600;font-size:13.5px;padding:10px 18px;border-radius:999px;background:var(--fill);color:var(--ink);transition:.2s}
+.btn-ghost:hover{background:var(--fill-deep)}
+.btn-forget{margin-left:auto;font-size:11px;color:#A5A8AC;text-decoration:underline;text-underline-offset:3px}
+.btn-forget:hover{color:var(--red)}
+
+/* ── responsief ────────────────────────────────────── */
+@media (max-width:720px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .form-top{flex-wrap:wrap;padding:8px 16px}
+  .btn-add{width:100%;text-align:center;margin-bottom:8px}
+  .form-controls{padding:14px 16px 16px}
+  .ctl{flex:1;min-width:140px}
+  .seg{min-width:0}
+  .pillfield{width:100%}
+  .task{flex-wrap:wrap;row-gap:10px}
+  .status-sel{order:5}
+  .task-actions{margin-left:auto}
+}
+</style>
+</head>
+<body>
+
+<nav class="bar">
+  <div class="bar-inner">
+    <span class="logo" aria-label="Elvedes">
+      <svg viewBox="0 0 189 58" fill="none" xmlns="http://www.w3.org/2000/svg" role="img"><path d="M159.848 51.134H29.2777C17.1389 51.134 7.10711 41.2269 7.10711 28.9999C7.10711 16.7729 17.1389 6.86584 29.3406 6.86584H159.817C172.113 6.86584 182.081 16.7729 182.081 28.9999C182.05 41.2269 172.301 51.134 159.848 51.134ZM159.785 0.03125H29.2148C12.0129 0.03125 0.220093 14.1394 0.220093 28.9999C0.220093 44.9891 13.2079 57.9685 29.2148 57.9685H159.942C176.044 57.9685 188.937 44.9891 188.937 28.9999C188.906 13.0107 175.886 0.03125 159.785 0.03125ZM33.6489 21.2875C26.9505 21.2875 25.8184 22.0399 23.9945 25.9275H33.6489V32.2291H23.9945C25.9128 36.4615 27.1392 36.8691 33.6489 36.8691V43.5783H29.5607C21.7617 43.5783 16.2898 37.1199 16.2898 29.0626C16.2898 21.0367 21.7617 14.5469 29.5607 14.5469H33.6489V21.2875ZM53.2407 36.6183H48.3035C45.4103 36.6183 44.6241 35.9285 44.6241 33.5458V14.5783H37.3911V34.2042C37.3911 40.9134 40.7246 43.5783 47.7374 43.5783H53.2722V36.6183H53.2407ZM51.3224 14.5783L56.4798 36.775C57.7377 42.0734 59.2158 44.0799 62.8637 44.0799C66.7632 44.0799 68.084 42.1048 69.4677 36.7123L75.0654 14.5783H67.5179L63.0209 34.7999H62.9266L58.9013 14.5783H51.3224ZM92.4559 14.5783H88.3362C80.5372 14.5783 75.0654 21.0366 75.0654 29.0939C75.0654 37.1199 80.5372 43.6096 88.3362 43.6096H92.4559V36.9004C85.9462 36.9004 84.6883 36.4929 82.8014 32.2604H92.4559V25.9588H82.8014C84.6254 22.0712 85.789 21.3188 92.4559 21.3188V14.5783ZM105.381 43.5783C113.683 43.5783 119.941 37.6842 119.941 29.3134C119.941 21.1934 114.218 14.5783 103.746 14.5783H96.3868V43.5783H103.62V21.5383C108.463 21.5383 112.551 23.8583 112.551 29.4075C112.551 33.295 109.438 36.6183 105.381 36.6183V43.5783ZM140.225 14.5783H136.105C128.306 14.5783 122.834 21.0366 122.834 29.0939C122.834 37.1199 128.306 43.6096 136.105 43.6096H140.225V36.9004C133.715 36.9004 132.457 36.4929 130.57 32.2604H140.225V25.9588H130.57C132.394 22.0712 133.558 21.3188 140.225 21.3188V14.5783ZM159.879 14.5783H152.332C147.804 14.5783 143.527 16.7415 143.527 22.7923C143.527 29.7523 153.936 32.2291 153.936 35.3015C153.936 36.3675 152.898 36.8691 151.231 36.8691H143.715V43.5783H151.483C160.791 43.5783 161.735 38.5934 161.735 34.8626C161.735 28.0594 150.917 24.9242 150.917 22.4788C150.917 21.601 151.672 21.2875 152.584 21.2875H159.879V14.5783ZM165.163 14.1394V13.3242H165.792C166.138 13.3242 166.358 13.4496 166.358 13.7004C166.358 14.0767 166.169 14.1707 165.855 14.1707H165.163V14.1394ZM165.163 14.7664H165.477L166.295 16.3026H167.144L166.2 14.735C166.829 14.7037 167.238 14.4529 167.238 13.7631C167.238 12.8853 166.672 12.6345 165.697 12.6345H164.314V16.3026H165.163V14.7664ZM165.697 11.9448C166.987 11.9448 168.087 12.9794 168.087 14.4842C168.087 15.9891 166.987 17.0237 165.697 17.0237C164.376 17.0237 163.307 15.9891 163.307 14.4842C163.339 12.9794 164.376 11.9448 165.697 11.9448ZM162.207 14.4842C162.207 16.6161 163.905 17.8388 165.697 17.8388C167.521 17.8388 169.188 16.6161 169.188 14.4842C169.188 12.3523 167.49 11.1296 165.697 11.1296C163.905 11.1296 162.207 12.3523 162.207 14.4842Z" fill="currentColor"/></svg>
+    </span>
+    <span class="spacer"></span>
+    <span class="sync" id="syncPill"><i></i><span id="syncText">LOKAAL</span></span>
+    <button class="iconbtn" id="btnRefresh" type="button" title="Laatste versie ophalen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+    </button>
+    <button class="iconbtn" id="btnSettings" type="button" title="Instellingen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main class="sheet">
+  <header class="hero">
+    <div class="date" id="todayLabel">—</div>
+    <h1>Werkplaatslijst<em>.</em></h1>
+    <p class="sub">Taakbeheer met de precisie van fietsonderdelen — sinds 1965.</p>
+    <div class="progress" id="progress" hidden>
+      <div class="track"><div class="fillbar" id="progressFill"></div></div>
+      <span class="pct" id="progressPct"></span>
+    </div>
+  </header>
+
+  <div class="banner" id="connectBanner" hidden>
+    <span class="dot"></span>
+    <p><strong>Nog niet verbonden met GitHub.</strong> Taken worden alleen op dit apparaat bewaard.</p>
+    <button type="button" id="btnBannerSettings">Verbinden</button>
+  </div>
+
+  <section class="stats" id="stats" aria-label="Overzicht"></section>
+
+  <section class="form-card">
+    <div class="form-edit" id="formEdit" hidden>
+      <span>Bewerken</span><span class="fid" id="formId"></span>
+      <button class="cancel" id="btnCancelEdit" type="button">Annuleren</button>
+    </div>
+    <form id="taskForm" autocomplete="off">
+      <div class="form-top">
+        <input class="title-input" id="fTitle" type="text" placeholder="Nieuwe taak — bijv. productteksten remkabels nakijken…" maxlength="200">
+        <button class="btn-add" id="btnSubmit" type="submit">TOEVOEGEN</button>
+      </div>
+      <div class="form-controls">
+        <div class="ctl">
+          <span>Categorie</span>
+          <select class="pillfield" id="fCat">
+            <option>PIM</option><option>SEO</option><option>Tools</option><option>School</option><option>Overig</option>
+          </select>
+        </div>
+        <div class="ctl">
+          <span>Prioriteit</span>
+          <div class="seg">
+            <span class="thumb"></span>
+            <label class="p-laag"><input type="radio" name="fPrio" value="Laag"><i></i>Laag</label>
+            <label class="p-mid"><input type="radio" name="fPrio" value="Gemiddeld" checked><i></i>Gemiddeld</label>
+            <label class="p-hoog"><input type="radio" name="fPrio" value="Hoog"><i></i>Hoog</label>
+          </div>
+        </div>
+        <div class="ctl">
+          <span>Deadline</span>
+          <input class="pillfield" id="fDeadline" type="date">
+        </div>
+        <div class="ctl">
+          <span>Status</span>
+          <select class="pillfield" id="fStatus">
+            <option>Nog niet gestart</option><option>Bezig</option><option>Klaar</option>
+          </select>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <div class="toolbar" id="toolbar">
+    <button class="chip on" data-cat="Alle" type="button">Alle</button>
+    <button class="chip" data-cat="PIM" type="button">PIM</button>
+    <button class="chip" data-cat="SEO" type="button">SEO</button>
+    <button class="chip" data-cat="Tools" type="button">Tools</button>
+    <button class="chip" data-cat="School" type="button">School</button>
+    <button class="chip" data-cat="Overig" type="button">Overig</button>
+    <span class="spacer"></span>
+    <select class="pillfield" id="filterStatus" title="Filter op status">
+      <option value="Alle">Status: alle</option>
+      <option value="Nog niet gestart">Nog niet gestart</option>
+      <option value="Bezig">Bezig</option>
+      <option value="Klaar">Klaar</option>
+    </select>
+    <select class="pillfield" id="sortMode" title="Sorteren">
+      <option value="deadline">Op deadline</option>
+      <option value="prioriteit">Op prioriteit</option>
+      <option value="nieuwste">Nieuwste eerst</option>
+    </select>
+  </div>
+
+  <section class="list" id="list" aria-live="polite"></section>
+
+  <footer>
+    <span>Elvedes · precisie in fietsonderdelen sinds 1965</span>
+    <span id="footInfo">—</span>
+  </footer>
+</main>
+
+<dialog id="dlgSettings">
+  <div class="dlg-head">
+    <h2>Sync-instellingen</h2>
+    <button type="button" id="btnCloseDlg" aria-label="Sluiten">✕</button>
+  </div>
+  <div class="dlg-body">
+    <div class="field">
+      <label for="sRepo">GitHub-repository (eigenaar/naam)</label>
+      <input id="sRepo" type="text" placeholder="bijv. larsvds/taken" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="sPath">Bestandspad in de repo</label>
+      <input id="sPath" type="text" value="elvedes-taken.json" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="sToken">Personal access token</label>
+      <div class="tok-row">
+        <input id="sToken" type="password" placeholder="github_pat_…" spellcheck="false">
+        <button type="button" id="btnShowToken">TOON</button>
+      </div>
+    </div>
+    <div class="hint">
+      <b>Advies:</b> gebruik een <b>fine-grained token</b> (GitHub → Settings → Developer settings → Fine-grained tokens) met als enige recht <b>Contents: Read &amp; write</b>, beperkt tot <b>alleen deze repository</b>. Het token blijft lokaal op dit apparaat (localStorage) en gaat alleen naar api.github.com.
+    </div>
+    <div class="dlg-status" id="dlgStatus"></div>
+    <div class="dlg-foot">
+      <button class="btn-primary" type="button" id="btnSaveSettings">Opslaan &amp; verbinden</button>
+      <button class="btn-ghost" type="button" id="btnTest">Test verbinding</button>
+      <button class="btn-forget" type="button" id="btnForget">vergeet token</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+'use strict';
+
+/* ═══════════ constanten & state ═══════════ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const LS_SETTINGS = 'elvedes.taken.settings';
+const LS_CACHE    = 'elvedes.taken.cache';
+const PRIO_RANK   = {'Hoog':0,'Gemiddeld':1,'Laag':2};
+const STATUS_RANK = {'Bezig':0,'Nog niet gestart':1,'Klaar':2};
+
+const ICON_TICK   = '<svg class="tick" viewBox="0 0 12 10"><path d="M1 5.2 4.3 8.4 11 1.4" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_PENCIL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const ICON_TRASH  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+const ICON_EMPTY  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12.5 2.7 2.7L16 9.5"/></svg>';
+
+let settings = { repo:'', token:'', path:'elvedes-taken.json' };
+try { Object.assign(settings, JSON.parse(localStorage.getItem(LS_SETTINGS)) || {}); } catch(e){}
+
+let state = { tasks:[], tombstones:{} };
+try { const c = JSON.parse(localStorage.getItem(LS_CACHE)); if (c) state = normalize(c); } catch(e){}
+
+let sha = null;             // sha van het bestand op GitHub (nodig voor PUT-updates)
+let editingId = null;
+let filterCat = 'Alle', filterStatus = 'Alle', sortMode = 'deadline';
+let saving = false, pendingSave = false, saveTimer = null, lastPull = 0;
+let armedDelete = null, armTimer = null;
+
+function normalize(d){
+  return {
+    tasks: Array.isArray(d && d.tasks) ? d.tasks.filter(t => t && t.id && t.title != null) : [],
+    tombstones: (d && d.tombstones && typeof d.tombstones === 'object') ? d.tombstones : {}
+  };
+}
+function configured(){ return /.+\/.+/.test(settings.repo) && !!settings.token && !!settings.path; }
+function cacheLocal(){ try { localStorage.setItem(LS_CACHE, JSON.stringify(state)); } catch(e){} }
+function makeId(){
+  return 'ELV-' + Date.now().toString(36).toUpperCase().slice(-5) + '-' +
+         Math.random().toString(36).slice(2,5).toUpperCase();
+}
+
+/* ═══════════ base64 (UTF-8-veilig) ═══════════ */
+function b64encode(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 4096) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 4096));
+  return btoa(bin);
+}
+function b64decode(b64){
+  const bin = atob(String(b64).replace(/\s/g,''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+/* ═══════════ merge (conflict-veilig) ═══════════
+   Nieuwste updatedAt per taak-id wint; verwijderingen reizen mee
+   als tombstones zodat een gewiste taak niet terugkeert vanaf
+   een ander apparaat. */
+function merge(local, remote){
+  const tomb = {};
+  for (const src of [remote.tombstones, local.tombstones])
+    for (const id in src) if (!(id in tomb) || src[id] > tomb[id]) tomb[id] = src[id];
+
+  const byId = {};
+  for (const t of [...remote.tasks, ...local.tasks]){
+    const cur = byId[t.id];
+    if (!cur || (t.updatedAt || 0) > (cur.updatedAt || 0)) byId[t.id] = t;
+  }
+  const tasks = Object.values(byId)
+    .filter(t => !(tomb[t.id] && tomb[t.id] >= (t.updatedAt || 0)))
+    .sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+  const cutoff = Date.now() - 90 * 864e5;           // tombstones 90 dagen bewaren
+  for (const id in tomb) if (tomb[id] < cutoff) delete tomb[id];
+  return { tasks, tombstones: tomb };
+}
+function canon(s){
+  return JSON.stringify({
+    tasks: s.tasks.slice().sort((a,b) => a.id < b.id ? -1 : 1),
+    tombstones: s.tombstones
+  });
+}
+
+/* ═══════════ GitHub Contents API ═══════════ */
+function api(opt = {}){
+  const path = settings.path.split('/').map(encodeURIComponent).join('/');
+  return fetch('https://api.github.com/repos/' + settings.repo + '/contents/' + path, {
+    ...opt,
+    headers: {
+      'Accept': 'application/vnd.github+json',
+      'Authorization': 'Bearer ' + settings.token,
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...(opt.headers || {})
+    }
+  });
+}
+
+async function pull(showBusy = true){
+  if (!configured()){ render(); return; }
+  if (showBusy) setSync('busy','OPHALEN…');
+  try {
+    const r = await api({ cache:'no-store' });
+    lastPull = Date.now();
+    if (r.status === 404){          // bestand bestaat nog niet in de repo
+      sha = null;
+      setSync('ok','VERBONDEN — NIEUW BESTAND');
+      if (state.tasks.length) scheduleSave();
+      render(); return;
+    }
+    if (r.status === 401 || r.status === 403) throw new Error('TOEGANG GEWEIGERD — CONTROLEER TOKEN');
+    if (!r.ok) throw new Error('GITHUB-FOUT ' + r.status);
+    const j = await r.json();
+    sha = j.sha;
+    const remote = normalize(JSON.parse(b64decode(j.content)));
+    const merged = merge(state, remote);
+    const localAhead = canon(merged) !== canon(remote);
+    state = merged;
+    cacheLocal(); render();
+    setSync('ok','GESYNCHRONISEERD ' + clock());
+    if (localAhead) scheduleSave();   // lokale wijzigingen die de remote nog mist
+  } catch(e){
+    setSync('err', (e && e.message) || 'SYNC-FOUT');
+    render();
+  }
+}
+
+async function push(){
+  if (!configured()){ setSync('local','ALLEEN LOKAAL'); return; }
+  if (saving){ pendingSave = true; return; }
+  saving = true;
+  setSync('busy','OPSLAAN…');
+  try {
+    for (let attempt = 0; attempt < 4; attempt++){
+      const body = {
+        message: 'Werkplaatslijst bijgewerkt (' + state.tasks.length + ' taken)',
+        content: b64encode(JSON.stringify({ version:1, ...state }, null, 2))
+      };
+      if (sha) body.sha = sha;
+      const r = await api({ method:'PUT', body: JSON.stringify(body) });
+      if (r.ok){
+        const j = await r.json();
+        sha = j.content.sha;
+        setSync('ok','OPGESLAGEN ' + clock());
+        return;
+      }
+      /* sha-conflict: ander apparaat was ons voor → laatste versie
+         ophalen, wijzigingen samenvoegen en opnieuw proberen */
+      if ((r.status === 409 || r.status === 422) && attempt < 3){
+        const g = await api({ cache:'no-store' });
+        if (g.ok){
+          const j = await g.json();
+          sha = j.sha;
+          state = merge(state, normalize(JSON.parse(b64decode(j.content))));
+          cacheLocal(); render();
+        } else if (g.status === 404){
+          sha = null;
+        } else throw new Error('GITHUB-FOUT ' + g.status + ' BIJ CONFLICT-HERSTEL');
+        continue;
+      }
+      if (r.status === 401 || r.status === 403) throw new Error('TOEGANG GEWEIGERD — CONTROLEER TOKEN');
+      if (r.status === 404) throw new Error('REPO OF PAD NIET GEVONDEN');
+      throw new Error('GITHUB-FOUT ' + r.status);
+    }
+    throw new Error('SYNC-CONFLICT NIET OPGELOST — PROBEER VERNIEUWEN');
+  } catch(e){
+    setSync('err', (e && e.message) || 'SYNC-FOUT');
+  } finally {
+    saving = false;
+    if (pendingSave){ pendingSave = false; scheduleSave(200); }
+  }
+}
+
+function scheduleSave(delay = 900){
+  cacheLocal();
+  if (!configured()){ setSync('local','ALLEEN LOKAAL'); return; }
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { saveTimer = null; push(); }, delay);
+}
+
+/* ═══════════ mutaties ═══════════ */
+function touch(){ cacheLocal(); render(); scheduleSave(); }
+
+function submitForm(){
+  const title = $('#fTitle').value.trim();
+  if (!title){ $('#fTitle').focus(); return; }
+  const data = {
+    title,
+    cat: $('#fCat').value,
+    prio: document.querySelector('input[name="fPrio"]:checked').value,
+    deadline: $('#fDeadline').value || '',
+    status: $('#fStatus').value
+  };
+  if (editingId){
+    const t = state.tasks.find(t => t.id === editingId);
+    if (t){ Object.assign(t, data); t.updatedAt = Date.now(); }
+    stopEdit(true);
+  } else {
+    state.tasks.push({ id: makeId(), createdAt: Date.now(), updatedAt: Date.now(), ...data });
+  }
+  resetForm();
+  touch();
+}
+
+function toggleDone(id){
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.status = t.status === 'Klaar' ? 'Nog niet gestart' : 'Klaar';
+  t.updatedAt = Date.now();
+  touch();
+}
+function setStatus(id, status){
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  t.status = status;
+  t.updatedAt = Date.now();
+  touch();
+}
+function removeTask(id){
+  state.tombstones[id] = Date.now();
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  if (editingId === id) stopEdit(true);
+  touch();
+}
+
+/* ═══════════ formulier bewerken ═══════════ */
+function startEdit(id){
+  const t = state.tasks.find(t => t.id === id);
+  if (!t) return;
+  editingId = id;
+  $('#fTitle').value = t.title;
+  $('#fCat').value = t.cat;
+  const prio = document.querySelector('input[name="fPrio"][value="' + t.prio + '"]');
+  if (prio) prio.checked = true;
+  $('#fDeadline').value = t.deadline || '';
+  $('#fStatus').value = t.status;
+  $('#formEdit').hidden = false;
+  $('#formId').textContent = t.id;
+  $('#btnSubmit').textContent = 'OPSLAAN';
+  render();
+  document.querySelector('.form-card').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  $('#fTitle').focus();
+}
+function stopEdit(skipRender){
+  editingId = null;
+  resetForm();
+  $('#formEdit').hidden = true;
+  $('#formId').textContent = '';
+  $('#btnSubmit').textContent = 'TOEVOEGEN';
+  if (!skipRender) render();
+}
+function resetForm(){
+  $('#fTitle').value = '';
+  $('#fDeadline').value = '';
+  $('#fCat').value = 'PIM';
+  $('#fStatus').value = 'Nog niet gestart';
+  document.querySelector('input[name="fPrio"][value="Gemiddeld"]').checked = true;
+}
+
+/* ═══════════ weergave ═══════════ */
+function fmtDate(d){
+  const p = n => String(n).padStart(2,'0');
+  return p(d.getDate()) + '·' + p(d.getMonth()+1) + '·' + d.getFullYear();
+}
+function clock(){
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function dueInfo(t){
+  if (!t.deadline) return null;
+  const d = new Date(t.deadline + 'T00:00:00');
+  if (isNaN(d)) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((d - today) / 864e5);
+  let rel = '', cls = '';
+  if (t.status !== 'Klaar'){
+    if (diff < 0){ rel = Math.abs(diff) + ' dgn te laat'; cls = 'overdue'; }
+    else if (diff === 0){ rel = 'vandaag'; cls = 'today'; }
+    else if (diff === 1){ rel = 'morgen'; }
+    else { rel = 'over ' + diff + ' dgn'; }
+  }
+  return { dateStr: fmtDate(d), rel, cls, overdue: diff < 0 && t.status !== 'Klaar' };
+}
+
+function setSync(kind, text){
+  $('#syncPill').className = 'sync ' + kind;
+  $('#syncText').textContent = text;
+  document.body.dataset.sync = kind;
+}
+
+function visibleTasks(){
+  let ts = state.tasks.slice();
+  if (filterCat !== 'Alle') ts = ts.filter(t => t.cat === filterCat);
+  if (filterStatus !== 'Alle') ts = ts.filter(t => t.status === filterStatus);
+  ts.sort((a,b) => {
+    if (sortMode !== 'nieuwste' && STATUS_RANK[a.status] !== STATUS_RANK[b.status])
+      return STATUS_RANK[a.status] - STATUS_RANK[b.status];
+    if (sortMode === 'prioriteit'){
+      if (PRIO_RANK[a.prio] !== PRIO_RANK[b.prio]) return PRIO_RANK[a.prio] - PRIO_RANK[b.prio];
+    }
+    if (sortMode === 'nieuwste') return (b.createdAt || 0) - (a.createdAt || 0);
+    const da = a.deadline || '9999-12-31', db = b.deadline || '9999-12-31';
+    if (da !== db) return da < db ? -1 : 1;
+    return PRIO_RANK[a.prio] - PRIO_RANK[b.prio];
+  });
+  return ts;
+}
+
+function render(){
+  $('#connectBanner').hidden = configured();
+
+  /* stats + voortgang */
+  const all = state.tasks;
+  const nOpen  = all.filter(t => t.status === 'Nog niet gestart').length;
+  const nBezig = all.filter(t => t.status === 'Bezig').length;
+  const nKlaar = all.filter(t => t.status === 'Klaar').length;
+  const nLaat  = all.filter(t => { const d = dueInfo(t); return d && d.overdue; }).length;
+  const p2 = n => String(n).padStart(2,'0');
+  $('#stats').innerHTML =
+    '<div class="stat"><div class="n">' + p2(nOpen) + '</div><div class="l">Nog niet gestart</div></div>' +
+    '<div class="stat s-bezig"><div class="n">' + p2(nBezig) + '</div><div class="l">Bezig</div></div>' +
+    '<div class="stat s-klaar"><div class="n">' + p2(nKlaar) + '</div><div class="l">Klaar</div></div>' +
+    '<div class="stat' + (nLaat ? ' s-laat' : '') + '"><div class="n">' + p2(nLaat) + '</div><div class="l">Over deadline</div></div>';
+
+  const prog = $('#progress');
+  if (all.length){
+    const pct = Math.round(nKlaar / all.length * 100);
+    prog.hidden = false;
+    $('#progressFill').style.width = pct + '%';
+    $('#progressPct').textContent = pct + '% · ' + nKlaar + ' van ' + all.length + ' klaar';
+  } else prog.hidden = true;
+
+  /* lijst */
+  const ts = visibleTasks();
+  const list = $('#list');
+  if (!ts.length){
+    list.innerHTML =
+      '<div class="empty">' + ICON_EMPTY +
+      '<div class="big">' + (all.length ? 'Geen taken binnen dit filter' : 'De werkbank is schoon') + '</div>' +
+      '<div class="subtext">' + (all.length ? 'Pas de filters hierboven aan.' : 'Voeg hierboven je eerste taak toe.') + '</div></div>';
+  } else {
+    list.innerHTML = ts.map((t, i) => {
+      const due = dueInfo(t);
+      const done = t.status === 'Klaar';
+      return '<article class="task p-' + esc(t.prio) + (done ? ' done' : '') + (t.id === editingId ? ' editing' : '') + '" data-id="' + esc(t.id) + '" style="--i:' + Math.min(i,10) + '">' +
+        '<button class="check" type="button" data-act="toggle" title="' + (done ? 'Terugzetten' : 'Markeer als klaar') + '">' + ICON_TICK + '</button>' +
+        '<div class="task-main">' +
+          '<div class="task-title">' + esc(t.title) + '</div>' +
+          '<div class="task-meta">' +
+            '<span class="tid">' + esc(t.id) + '</span>' +
+            '<span class="cat-tag">' + esc(t.cat) + '</span>' +
+            '<span class="prio p-' + esc(t.prio) + '"><i></i>' + esc(t.prio) + '</span>' +
+            (due ? '<span class="due ' + due.cls + '">' + due.dateStr + (due.rel ? ' · <span class="rel">' + due.rel + '</span>' : '') + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+        '<select class="status-sel st-' + esc(t.status).split(' ')[0] + '" data-act="status" title="Status">' +
+          ['Nog niet gestart','Bezig','Klaar'].map(s =>
+            '<option' + (s === t.status ? ' selected' : '') + '>' + s + '</option>').join('') +
+        '</select>' +
+        '<div class="task-actions">' +
+          '<button type="button" data-act="edit" title="Bewerken">' + ICON_PENCIL + '</button>' +
+          '<button type="button" class="del" data-act="del" title="Verwijderen">' + ICON_TRASH + '</button>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+  }
+
+  $('#footInfo').textContent = configured()
+    ? settings.repo + ' / ' + settings.path
+    : 'niet verbonden — alleen lokaal';
+}
+
+/* ═══════════ instellingen-dialoog ═══════════ */
+const dlg = $('#dlgSettings');
+function openSettings(){
+  $('#sRepo').value = settings.repo;
+  $('#sPath').value = settings.path;
+  $('#sToken').value = settings.token;
+  $('#dlgStatus').textContent = '';
+  $('#dlgStatus').className = 'dlg-status';
+  dlg.showModal();
+}
+function readSettingsForm(){
+  return {
+    repo: $('#sRepo').value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/+$/,''),
+    path: $('#sPath').value.trim().replace(/^\/+/,'') || 'elvedes-taken.json',
+    token: $('#sToken').value.trim()
+  };
+}
+async function testConnection(){
+  const s = readSettingsForm();
+  const el = $('#dlgStatus');
+  if (!/.+\/.+/.test(s.repo) || !s.token){
+    el.textContent = 'VUL EERST REPO (eigenaar/naam) EN TOKEN IN'; el.className = 'dlg-status err'; return false;
+  }
+  el.textContent = 'TESTEN…'; el.className = 'dlg-status';
+  try {
+    const r = await fetch('https://api.github.com/repos/' + s.repo, {
+      cache:'no-store',
+      headers: {
+        'Accept':'application/vnd.github+json',
+        'Authorization':'Bearer ' + s.token,
+        'X-GitHub-Api-Version':'2022-11-28'
+      }
+    });
+    if (r.status === 401){ el.textContent = 'TOKEN ONGELDIG OF VERLOPEN'; el.className = 'dlg-status err'; return false; }
+    if (r.status === 404){ el.textContent = 'REPO NIET GEVONDEN — CONTROLEER NAAM EN TOKEN-RECHTEN'; el.className = 'dlg-status err'; return false; }
+    if (!r.ok){ el.textContent = 'GITHUB-FOUT ' + r.status; el.className = 'dlg-status err'; return false; }
+    const j = await r.json();
+    if (j.permissions && !j.permissions.push){
+      el.textContent = 'VERBONDEN, MAAR GEEN SCHRIJFRECHT — GEEF HET TOKEN CONTENTS: READ & WRITE';
+      el.className = 'dlg-status err'; return false;
+    }
+    el.textContent = 'VERBINDING OK — ' + j.full_name; el.className = 'dlg-status ok';
+    return true;
+  } catch(e){
+    el.textContent = 'NETWERKFOUT — GEEN VERBINDING MET API.GITHUB.COM'; el.className = 'dlg-status err';
+    return false;
+  }
+}
+
+/* ═══════════ events ═══════════ */
+$('#taskForm').addEventListener('submit', e => { e.preventDefault(); submitForm(); });
+$('#btnCancelEdit').addEventListener('click', () => stopEdit());
+$('#btnSettings').addEventListener('click', openSettings);
+$('#btnBannerSettings').addEventListener('click', openSettings);
+$('#btnCloseDlg').addEventListener('click', () => dlg.close());
+$('#btnRefresh').addEventListener('click', () => pull(true));
+$('#btnTest').addEventListener('click', testConnection);
+$('#btnShowToken').addEventListener('click', () => {
+  const i = $('#sToken');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  $('#btnShowToken').textContent = i.type === 'password' ? 'TOON' : 'VERBERG';
+});
+$('#btnForget').addEventListener('click', () => {
+  settings.token = '';
+  $('#sToken').value = '';
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  $('#dlgStatus').textContent = 'TOKEN VERWIJDERD VAN DIT APPARAAT';
+  $('#dlgStatus').className = 'dlg-status ok';
+  setSync('local','ALLEEN LOKAAL');
+  render();
+});
+$('#btnSaveSettings').addEventListener('click', async () => {
+  settings = readSettingsForm();
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  if (configured()){
+    dlg.close();
+    sha = null;
+    await pull(true);
+  } else {
+    $('#dlgStatus').textContent = 'OPGESLAGEN — MAAR NOG ONVOLLEDIG (REPO + TOKEN NODIG VOOR SYNC)';
+    $('#dlgStatus').className = 'dlg-status err';
+    render();
+  }
+});
+
+$('#toolbar').addEventListener('click', e => {
+  const chip = e.target.closest('.chip[data-cat]');
+  if (!chip) return;
+  filterCat = chip.dataset.cat;
+  document.querySelectorAll('.chip[data-cat]').forEach(c => c.classList.toggle('on', c === chip));
+  render();
+});
+$('#filterStatus').addEventListener('change', e => { filterStatus = e.target.value; render(); });
+$('#sortMode').addEventListener('change', e => { sortMode = e.target.value; render(); });
+
+$('#list').addEventListener('click', e => {
+  const row = e.target.closest('.task'); if (!row) return;
+  const id = row.dataset.id;
+  const act = e.target.closest('[data-act]');
+  if (!act) return;
+  if (act.dataset.act === 'toggle') toggleDone(id);
+  else if (act.dataset.act === 'edit') startEdit(id);
+  else if (act.dataset.act === 'del'){
+    if (armedDelete === id){
+      clearTimeout(armTimer); armedDelete = null;
+      removeTask(id);
+    } else {
+      armedDelete = id;
+      act.classList.add('armed');
+      act.textContent = 'Zeker?';
+      clearTimeout(armTimer);
+      armTimer = setTimeout(() => {
+        armedDelete = null;
+        act.classList.remove('armed');
+        act.innerHTML = ICON_TRASH;
+      }, 2600);
+    }
+  }
+});
+$('#list').addEventListener('change', e => {
+  const sel = e.target.closest('.status-sel'); if (!sel) return;
+  const row = e.target.closest('.task'); if (!row) return;
+  setStatus(row.dataset.id, sel.value);
+});
+
+/* verse data ophalen wanneer het tabblad weer zichtbaar wordt */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && configured() && !saving && Date.now() - lastPull > 20000) pull(false);
+});
+
+/* waarschuwen bij sluiten terwijl er nog niet is opgeslagen */
+window.addEventListener('beforeunload', e => {
+  if (saveTimer || saving || pendingSave){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+/* ═══════════ start ═══════════ */
+$('#todayLabel').textContent = fmtDate(new Date());
+if (configured()){
+  setSync('busy','OPHALEN…');
+  pull(true);                 // altijd eerst de laatste versie van GitHub
+} else {
+  setSync('local','ALLEEN LOKAAL');
+}
+render();
+</script>
+</body>
+</html>
