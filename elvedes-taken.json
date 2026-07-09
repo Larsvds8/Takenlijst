@@ -110,6 +110,16 @@
       "prio": "Gemiddeld",
       "deadline": "",
       "status": "Nog niet gestart"
+    },
+    {
+      "id": "ELV-4296N-A2G",
+      "createdAt": 1783577617151,
+      "updatedAt": 1783577617151,
+      "title": "Inzicht klantaankopen (zie mail peter)",
+      "cat": "Tools",
+      "prio": "Laag",
+      "deadline": "",
+      "status": "Nog niet gestart"
     }
   ],
   "tombstones": {
