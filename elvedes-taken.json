@@ -124,12 +124,12 @@
     {
       "id": "ELV-4308Q-EOD",
       "createdAt": 1783577652218,
-      "updatedAt": 1783577652218,
+      "updatedAt": 1783923344205,
       "title": "Verpakkingseindheid incl. Afbeelding verpakking",
       "cat": "PIM",
       "prio": "Gemiddeld",
       "deadline": "",
-      "status": "Nog niet gestart"
+      "status": "Klaar"
     }
   ],
   "tombstones": {
