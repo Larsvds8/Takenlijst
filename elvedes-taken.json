@@ -82,16 +82,6 @@
       "status": "Nog niet gestart"
     },
     {
-      "id": "ELV-6679V-3S2",
-      "createdAt": 1783520694355,
-      "updatedAt": 1783923330621,
-      "title": "Medium compound ook voor speedpedelec, Supersoft is voor bij piepende remmen, voor lage vervangingsinterval.",
-      "cat": "PIM",
-      "prio": "Gemiddeld",
-      "deadline": "",
-      "status": "Klaar"
-    },
-    {
       "id": "ELV-4296N-A2G",
       "createdAt": 1783577617151,
       "updatedAt": 1783923253245,
@@ -116,6 +106,7 @@
     "ELV-CZ61O-3MQ": 1782988315073,
     "ELV-D6KZT-WV1": 1782988317449,
     "ELV-EFI98-4UW": 1784706297413,
-    "ELV-IFFO5-KXS": 1784706299476
+    "ELV-IFFO5-KXS": 1784706299476,
+    "ELV-6679V-3S2": 1784706301925
   }
 }
