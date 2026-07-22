@@ -42,16 +42,6 @@
       "status": "Bezig"
     },
     {
-      "id": "ELV-EFI98-4UW",
-      "createdAt": 1782990369836,
-      "updatedAt": 1783000739604,
-      "title": "Pins en clips in beschrijving toevoegen",
-      "cat": "PIM",
-      "prio": "Gemiddeld",
-      "deadline": "",
-      "status": "Klaar"
-    },
-    {
       "id": "ELV-IFFO5-KXS",
       "createdAt": 1782997084949,
       "updatedAt": 1783324738768,
@@ -134,6 +124,7 @@
   ],
   "tombstones": {
     "ELV-CZ61O-3MQ": 1782988315073,
-    "ELV-D6KZT-WV1": 1782988317449
+    "ELV-D6KZT-WV1": 1782988317449,
+    "ELV-EFI98-4UW": 1784706297413
   }
 }
