@@ -42,16 +42,6 @@
       "status": "Bezig"
     },
     {
-      "id": "ELV-IFFO5-KXS",
-      "createdAt": 1782997084949,
-      "updatedAt": 1783324738768,
-      "title": "Werkplaatsverpakking toevoegen beschrijving brake categorie",
-      "cat": "Tools",
-      "prio": "Gemiddeld",
-      "deadline": "",
-      "status": "Klaar"
-    },
-    {
       "id": "ELV-JRSTE-76W",
       "createdAt": 1782999341474,
       "updatedAt": 1782999341474,
@@ -125,6 +115,7 @@
   "tombstones": {
     "ELV-CZ61O-3MQ": 1782988315073,
     "ELV-D6KZT-WV1": 1782988317449,
-    "ELV-EFI98-4UW": 1784706297413
+    "ELV-EFI98-4UW": 1784706297413,
+    "ELV-IFFO5-KXS": 1784706299476
   }
 }
