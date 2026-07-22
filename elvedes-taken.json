@@ -90,16 +90,6 @@
       "prio": "Laag",
       "deadline": "",
       "status": "Bezig"
-    },
-    {
-      "id": "ELV-4308Q-EOD",
-      "createdAt": 1783577652218,
-      "updatedAt": 1783923344205,
-      "title": "Verpakkingseindheid incl. Afbeelding verpakking",
-      "cat": "PIM",
-      "prio": "Gemiddeld",
-      "deadline": "",
-      "status": "Klaar"
     }
   ],
   "tombstones": {
@@ -107,6 +97,7 @@
     "ELV-D6KZT-WV1": 1782988317449,
     "ELV-EFI98-4UW": 1784706297413,
     "ELV-IFFO5-KXS": 1784706299476,
-    "ELV-6679V-3S2": 1784706301925
+    "ELV-6679V-3S2": 1784706301925,
+    "ELV-4308Q-EOD": 1784706304325
   }
 }
